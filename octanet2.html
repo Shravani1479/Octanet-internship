@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .add-task {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .add-task input, .add-task select, .add-task button {
+            padding: 10px;
+            margin-right: 10px;
+        }
+
+        .task-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .task-table th, .task-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .task-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        .actions button {
+            margin-right: 5px;
+        }
+
+        .completed {
+            text-decoration: line-through;
+            color: gray;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>To-Do List Manager</h1>
+       
+        <div class="add-task">
+            <input type="text" id="task-input" placeholder="Enter new task...">
+            <input type="date" id="due-date">
+            <select id="priority">
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+            </select>
+            <button id="add-task-button">Add Task</button>
+        </div>
+
+        <table class="task-table">
+            <thead>
+                <tr>
+                    <th>Priority</th>
+                    <th>Task Description</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="task-list">
+                <!-- Tasks will be dynamically added here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const taskInput = document.getElementById('task-input');
+            const dueDateInput = document.getElementById('due-date');
+            const prioritySelect = document.getElementById('priority');
+            const addTaskButton = document.getElementById('add-task-button');
+            const taskList = document.getElementById('task-list');
+
+            addTaskButton.addEventListener('click', addTask);
+
+            function addTask() {
+                const taskDescription = taskInput.value;
+                const dueDate = dueDateInput.value;
+                const priority = prioritySelect.value;
+
+                if (taskDescription && dueDate) {
+                    const taskRow = document.createElement('tr');
+
+                    taskRow.innerHTML = `
+                        <td>${priority}</td>
+                        <td>${taskDescription}</td>
+                        <td>${dueDate}</td>
+                        <td>Not Started</td>
+                        <td class="actions">
+                            <button class="complete-button">Complete</button>
+                            <button class="edit-button">Edit</button>
+                            <button class="delete-button">Delete</button>
+                        </td>
+                    `;
+
+                    taskList.appendChild(taskRow);
+
+                    taskInput.value = '';
+                    dueDateInput.value = '';
+                    prioritySelect.value = 'Medium';
+
+                    const completeButton = taskRow.querySelector('.complete-button');
+                    const editButton = taskRow.querySelector('.edit-button');
+                    const deleteButton = taskRow.querySelector('.delete-button');
+
+                    completeButton.addEventListener('click', () => completeTask(taskRow));
+                    editButton.addEventListener('click', () => editTask(taskRow));
+                    deleteButton.addEventListener('click', () => deleteTask(taskRow));
+                } else {
+                    alert('Please enter a task description and due date.');
+                }
+            }
+
+            function completeTask(taskRow) {
+                const statusCell = taskRow.cells[3];
+                statusCell.textContent = statusCell.textContent === 'Completed' ? 'Not Started' : 'Completed';
+                taskRow.classList.toggle('completed');
+            }
+
+            function editTask(taskRow) {
+                const taskDescription = taskRow.cells[1].textContent;
+                const dueDate = taskRow.cells[2].textContent;
+                const priority = taskRow.cells[0].textContent;
+
+                taskInput.value = taskDescription;
+                dueDateInput.value = dueDate;
+                prioritySelect.value = priority;
+
+                taskList.removeChild(taskRow);
+
+                addTaskButton.textContent = 'Update Task';
+                addTaskButton.removeEventListener('click', addTask);
+                addTaskButton.addEventListener('click', () => updateTask(taskRow));
+            }
+
+            function updateTask(taskRow) {
+                taskRow.cells[0].textContent = prioritySelect.value;
+                taskRow.cells[1].textContent = taskInput.value;
+                taskRow.cells[2].textContent = dueDateInput.value;
+                taskRow.cells[3].textContent = 'Not Started';
+
+                taskList.appendChild(taskRow);
+
+                taskInput.value = '';
+                dueDateInput.value = '';
+                prioritySelect.value = 'Medium';
+
+                addTaskButton.textContent = 'Add Task';
+                addTaskButton.removeEventListener('click', updateTask);
+                addTaskButton.addEventListener('click', addTask);
+            }
+
+            function deleteTask(taskRow) {
+                taskList.removeChild(taskRow);
+            }
+        });
+    </script>
+</body>
+</html>
